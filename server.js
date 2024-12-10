@@ -44,8 +44,17 @@ if (!fs.existsSync(DATA_FILE) || readData().length === 0) {
 app.get('/people', (req, res) => {
     const people = readData();
     res.json(people);
-  });
+});
 
+// GET a specific person by their ID
+app.get('/people/:id', (req, res) => {
+    const people = readData();
+    const person = people.find(p => p.id === parseInt(req.params.id));
+    if (!person) {
+        return res.status(404).json({ error: 'Person does not exist' });
+    }
+    res.json(person);
+});
 
 // create, update, and delete endponts tbd
 
