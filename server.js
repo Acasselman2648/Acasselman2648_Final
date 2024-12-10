@@ -10,26 +10,25 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// path to the JSON file
+// path to the json file
 const DATA_FILE = path.join(__dirname, 'people.json');
-
-// the function to read data from the JSON file
+// the function to read data from the json file
 const readData = () => {
     try {
         const data = fs.readFileSync(DATA_FILE, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
-        // returns empty array if the file doesn't exist or is empty
+        // returns empty array if error
         return [];
     }
 };
 
-// function to write the data to the JSON file
+// function to write the data to the json file
 const writeData = (data) => {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 };
 
-// seed the JSON file with data if its empty
+// seed the json file with some data if its empty
 if (!fs.existsSync(DATA_FILE) || readData().length === 0) {
     const seedData = [
         { id: 1, firstName: 'Jackie', lastName: 'Chan', age: '70' },
@@ -40,13 +39,17 @@ if (!fs.existsSync(DATA_FILE) || readData().length === 0) {
     writeData(seedData);
 }
 
-// GET list of all people
+//***********************
+// GET list of all people (Get all resources)
+//***********************
 app.get('/people', (req, res) => {
     const people = readData();
     res.json(people);
 });
 
-// GET a specific person by their ID
+//***********************
+// GET a specific person by their ID (Get resource by ID)
+//***********************
 app.get('/people/:id', (req, res) => {
     const people = readData();
     const person = people.find(p => p.id === parseInt(req.params.id));
@@ -56,7 +59,9 @@ app.get('/people/:id', (req, res) => {
     res.json(person);
 });
 
+//***********************
 // Add a new person (Create a resource)
+//***********************
 app.post('/people', (req, res) => {
     const { firstName, lastName, age } = req.body;
     // require all fields before manipulation
@@ -78,7 +83,9 @@ app.post('/people', (req, res) => {
     res.status(201).json(newPerson);
 });
 
-// update an existing person by their ID
+//***********************
+// Update an existing person by their ID (Update resource)
+//***********************
 app.put('/people/:id', (req, res) => {
     const { id } = req.params;
     const { firstName, lastName, age } = req.body;
@@ -100,10 +107,24 @@ app.put('/people/:id', (req, res) => {
     res.json(people[personIndex]);
 });
 
+//***********************
+// Delete a person by ID (Delete resource)
+//***********************
+app.delete('/people/:id', (req, res) => {
+    const { id } = req.params;
+    const people = readData();
+    // find the person by ID
+    const personIndex = people.findIndex(p => p.id === parseInt(id));
+    if (personIndex === -1) {
+        return res.status(404).json({ error: 'Person not found' });
+    }
+    // remove the person from the list
+    const deletedPerson = people.splice(personIndex, 1)[0];
+    // save the updated person back to the json file
+    writeData(people);
+    res.json(deletedPerson);
+});
 
-
-
-// delete endponts tbd
 
 // start the server
 app.listen(PORT, () => {
