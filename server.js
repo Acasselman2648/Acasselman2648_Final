@@ -56,6 +56,33 @@ app.get('/people/:id', (req, res) => {
     res.json(person);
 });
 
+
+// Add a new person (Create a resource)
+app.post('/people', (req, res) => {
+    const { firstName, lastName, age } = req.body;
+    // require all fields before manipulation
+    if (!firstName || !lastName || !age) {
+        return res.status(400).json({ error: 'All fields (firstName, lastName, age) are required' });
+    }
+    const people = readData();
+    // make a new ID based on the existing IDs
+    const newPerson = {
+        id: people.length > 0 ? people[people.length - 1].id + 1 : 1,
+        firstName,
+        lastName,
+        age,
+    };
+    // add the new person to the list
+    people.push(newPerson);
+    // rewrite the json poeple list
+    writeData(people);
+    res.status(201).json(newPerson);
+});
+
+
+
+
+
 // create, update, and delete endponts tbd
 
 // srtart the server
