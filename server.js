@@ -1,7 +1,7 @@
 // Acasselman2648 - 8482648 - PROG3175 - 09/12/2024
 const express = require('express');
 
-// requirements for JSON file R/W
+// necessary for json file R/W
 const fs = require('fs');
 const path = require('path');
 
@@ -56,7 +56,6 @@ app.get('/people/:id', (req, res) => {
     res.json(person);
 });
 
-
 // Add a new person (Create a resource)
 app.post('/people', (req, res) => {
     const { firstName, lastName, age } = req.body;
@@ -79,13 +78,34 @@ app.post('/people', (req, res) => {
     res.status(201).json(newPerson);
 });
 
+// update an existing person by their ID
+app.put('/people/:id', (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, age } = req.body;
+    // require all fields before manipulation
+    if (!firstName || !lastName || !age) {
+        return res.status(400).json({ error: 'All fields (firstName, lastName, age) are required' });
+    }
+    const people = readData();
+    // find the person to update
+    const personIndex = people.findIndex(p => p.id === parseInt(id));
+    // throw an error if person not found
+    if (personIndex === -1) {
+        return res.status(404).json({ error: 'Person not found' });
+    }
+    // update the person's details
+    people[personIndex] = { id: parseInt(id), firstName, lastName, age };
+    // save the updated data back to the json file
+    writeData(people);
+    res.json(people[personIndex]);
+});
 
 
 
 
-// create, update, and delete endponts tbd
+// delete endponts tbd
 
-// srtart the server
+// start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
